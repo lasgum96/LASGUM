@@ -1,0 +1,12 @@
+{
+  "name": "LASGUM | Portal Ujian Terpadu",
+  "short_name": "LASGUM",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "description": "Aplikasi ujian sekolah offline-first LASGUM — Final Distribution 44.0.",
+  "categories": ["education","productivity"]
+}
