@@ -1,23 +1,80 @@
-const CACHE='lasgum-v44-shell';
-const SHELL=['./','./APLIKASI_UJIAN_V44_FINAL_DISTRIBUTION.html','./lasgum.webmanifest'];
-const RUNTIME_ORIGINS=['https://cdn.tailwindcss.com','https://cdn.jsdelivr.net'];
-self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})).then(()=>self.skipWaiting()));
+const CACHE='lasgum-v45-shell';
+const RUNTIME_CACHE='lasgum-v45-runtime';
+
+const SHELL=[
+  './',
+  './index.html',
+  './lasgum.webmanifest'
+];
+
+const RUNTIME_URLS=[
+  'https://cdn.tailwindcss.com',
+  'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    await cache.addAll(SHELL);
+
+    // CDN files are stored as opaque responses when the browser permits it.
+    // If a CDN is temporarily unavailable, installation still succeeds.
+    for(const url of RUNTIME_URLS){
+      try{
+        const res=await fetch(url,{mode:'no-cors',cache:'no-store'});
+        if(res && (res.ok || res.type==='opaque')){
+          const rc=await caches.open(RUNTIME_CACHE);
+          await rc.put(url,res.clone());
+        }
+      }catch(e){}
+    }
+    await self.skipWaiting();
+  })());
 });
-self.addEventListener('activate',event=>{
-  event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+
+self.addEventListener('activate', event => {
+  event.waitUntil((async()=>{
+    const keep=new Set([CACHE,RUNTIME_CACHE]);
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>!keep.has(k)).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
 });
-self.addEventListener('fetch',event=>{
-  const req=event.request, u=new URL(req.url);
-  const same=u.origin===location.origin, runtime=RUNTIME_ORIGINS.includes(u.origin);
-  if(!same && !runtime)return;
-  event.respondWith(caches.match(req).then(cached=>{
-    if(cached)return cached;
-    return fetch(req).then(r=>{
-      if(r && (r.ok || r.type==='opaque')){
-        const copy=r.clone(); caches.open(CACHE).then(c=>c.put(req,copy)).catch(()=>{});
+
+self.addEventListener('fetch', event => {
+  const req=event.request;
+  if(req.method!=='GET') return;
+
+  const url=new URL(req.url);
+
+  if(url.origin===location.origin){
+    event.respondWith((async()=>{
+      const cached=await caches.match(req);
+      if(cached) return cached;
+      try{
+        const fresh=await fetch(req);
+        const cache=await caches.open(CACHE);
+        cache.put(req,fresh.clone());
+        return fresh;
+      }catch(e){
+        return cached || Response.error();
       }
-      return r;
-    }).catch(()=>cached || new Response('',{status:503,statusText:'Offline'}));
-  }));
+    })());
+    return;
+  }
+
+  if(RUNTIME_URLS.includes(req.url)){
+    event.respondWith((async()=>{
+      const rc=await caches.open(RUNTIME_CACHE);
+      const cached=await rc.match(req.url);
+      try{
+        const fresh=await fetch(req,{mode:'no-cors'});
+        if(fresh && (fresh.ok || fresh.type==='opaque')){
+          rc.put(req.url,fresh.clone());
+          return fresh;
+        }
+      }catch(e){}
+      return cached || Response.error();
+    })());
+  }
 });

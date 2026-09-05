@@ -55,6 +55,11 @@
 @media(max-width:900px){#lasgum-dashboard-panel .lasgum-v40-top-hero{flex-direction:column!important;align-items:stretch!important;}#lasgum-dashboard-panel .lasgum-v40-top-actions{justify-content:flex-start!important;margin-left:0!important;}}
 </style>
 <meta name="referrer" content="strict-origin-when-cross-origin">
+
+<style id="lasgum-offline-v45">
+#lasgum-offline-status{position:fixed;right:12px;bottom:12px;z-index:99999;font:600 12px/1.2 system-ui,-apple-system,sans-serif;padding:7px 10px;border-radius:999px;background:#0f172a;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18);opacity:.92}
+#lasgum-offline-status.offline{background:#7f1d1d}
+</style>
 </head>
 <body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
   <!-- Top Navigation Bar -->
@@ -4349,8 +4354,8 @@ ensureSections();
 <script id="lasgum-v41-final-marker">
 (function(){
   'use strict';
-  window.LASGUM_APP_VERSION='44.0';
-  window.LASGUM_RELEASE='FINAL DISTRIBUTION';
+  window.LASGUM_APP_VERSION='45.0';
+  window.LASGUM_RELEASE='OFFLINE FULL DISTRIBUTION';
   window.LASGUM_RELEASE_DATE='2026-09-05';
   // PWA registration is optional. Google Sites remains a portal/embed host;
   // the service worker activates when this app is hosted directly on HTTPS.
