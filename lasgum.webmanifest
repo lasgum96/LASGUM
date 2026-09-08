@@ -1,0 +1,13 @@
+{
+  "name": "LASGUM — Layanan Akademik Sekolah Guru dan Murid",
+  "short_name": "LASGUM",
+  "description": "Layanan Akademik Sekolah Guru dan Murid",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "id",
+  "categories": ["education"]
+}
