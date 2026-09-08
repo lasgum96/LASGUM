@@ -1,0 +1,7 @@
+const CACHE='lasgum-v62-stable-shell';
+const RUNTIME_CACHE='lasgum-v62-stable-runtime';
+const SHELL=['./','./index.html?v=62-stable'];
+const RUNTIME_URLS=['https://cdn.tailwindcss.com','https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'];
+self.addEventListener('install',event=>event.waitUntil((async()=>{const c=await caches.open(CACHE);await c.addAll(SHELL);for(const u of RUNTIME_URLS){try{const r=await fetch(u,{mode:'no-cors',cache:'no-store'});if(r&&(r.ok||r.type==='opaque'))(await caches.open(RUNTIME_CACHE)).put(u,r.clone())}catch(e){}}await self.skipWaiting()})()));
+self.addEventListener('activate',event=>event.waitUntil((async()=>{const keep=new Set([CACHE,RUNTIME_CACHE]);const ks=await caches.keys();await Promise.all(ks.filter(k=>!keep.has(k)).map(k=>caches.delete(k)));await self.clients.claim()})()));
+self.addEventListener('fetch',event=>{const req=event.request;if(req.method!=='GET')return;const u=new URL(req.url);if(u.origin===location.origin){event.respondWith((async()=>{try{const r=await fetch(new Request(req,{cache:'no-store'}));if(r&&r.ok){(await caches.open(CACHE)).put(req,r.clone());return r}}catch(e){}return (await caches.match(req))||Response.error()})());return}if(RUNTIME_URLS.includes(req.url))event.respondWith((async()=>{const c=await caches.open(RUNTIME_CACHE);try{const r=await fetch(req,{mode:'no-cors'});if(r&&(r.ok||r.type==='opaque')){c.put(req.url,r.clone());return r}}catch(e){}return (await c.match(req.url))||Response.error()})())});
