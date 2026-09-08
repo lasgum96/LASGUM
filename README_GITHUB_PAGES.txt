@@ -1,1 +1,0 @@
-Upload seluruh isi folder LASGUM_V60_CLEAN ke GitHub Pages, lalu Ctrl+F5.
